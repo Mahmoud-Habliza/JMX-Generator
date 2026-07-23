@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>JMeter Test Plan Generator</title>
+<style>
+  :root{
+    --bg:#12161c;
+    --panel:#181d25;
+    --panel2:#1f2530;
+    --line:#2a3140;
+    --line-strong:#3a4457;
+    --text:#e7ebf1;
+    --text-dim:#8b93a3;
+    --amber:#ffb020;
+    --amber-dim:#8a6318;
+    --teal:#3ddc97;
+    --teal-dim:#1c6b4c;
+    --red:#ff9d9d;
+    --mono:'IBM Plex Mono','Courier New',monospace;
+    --sans:'IBM Plex Sans',Tahoma,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);padding:32px;direction:rtl;}
+  .wrap{max-width:1220px;margin:0 auto;}
+  .head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:28px;}
+  .head h1{font-size:22px;font-weight:600;margin:0 0 6px 0;}
+  .head p{margin:0;color:var(--text-dim);font-size:13px;direction:ltr;text-align:right;unicode-bidi:plaintext;}
+  .status{font-family:var(--mono);font-size:11px;color:var(--teal);border:1px solid var(--teal-dim);background:rgba(61,220,151,0.08);padding:4px 10px;border-radius:2px;white-space:nowrap;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  @media (max-width:900px){ .grid{grid-template-columns:1fr;} }
+  .section{background:var(--panel);border:1px solid var(--line);border-radius:4px;margin-bottom:18px;overflow:hidden;}
+  .section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:var(--panel2);border-bottom:1px solid var(--line);font-size:13px;font-weight:600;color:var(--amber);}
+  .section-title .left{display:flex;align-items:center;gap:10px;}
+  .section-title .n{font-family:var(--mono);font-size:11px;color:var(--bg);background:var(--amber);width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;}
+  .icon-btn{background:transparent;border:none;color:var(--text-dim);font-size:13px;cursor:pointer;padding:2px 4px;border-radius:3px;line-height:1;width:auto;flex:none;}
+  .icon-btn:hover{color:var(--amber);background:rgba(255,176,32,0.1);}
+  .title-text{outline:none;}
+  .title-text[contenteditable="true"]{color:var(--text);background:#0e1218;border:1px dashed var(--amber);border-radius:3px;padding:1px 6px;}
+  .info-icon{position:relative;display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1px solid var(--text-dim);color:var(--text-dim);font-size:10px;font-style:normal;cursor:help;flex:none;}
+  .info-icon .tip{display:none;position:absolute;top:120%;right:0;z-index:20;width:240px;background:#0a0d12;border:1px solid var(--line-strong);color:var(--text);font-size:11px;font-weight:400;line-height:1.6;padding:10px 12px;border-radius:4px;box-shadow:0 4px 14px rgba(0,0,0,0.4);direction:rtl;text-align:right;}
+  .info-icon:hover .tip{display:block;}
+  .field-label-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+  .field-label-row label{margin-bottom:0;}
+  .section-note{font-size:11px;font-weight:400;color:var(--text-dim);}
+  .section-body{padding:16px;}
+  .field{margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:block;font-size:12px;color:var(--text-dim);margin-bottom:6px;}
+  .field input, .field textarea, .field select{width:100%;background:#0e1218;border:1px solid var(--line-strong);color:var(--text);font-family:var(--mono);font-size:13px;padding:8px 10px;border-radius:3px;direction:ltr;text-align:left;}
+  .field input:focus, .field textarea:focus, .field select:focus{outline:none;border-color:var(--amber);}
+  .field textarea{resize:vertical;min-height:50px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .hint{font-size:11px;color:var(--text-dim);margin-top:4px;}
+
+  .item-card{border:1px solid var(--line);border-radius:4px;padding:12px;margin-bottom:10px;background:#0e1218;}
+  .item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .item-head .item-label{font-family:var(--mono);font-size:11px;color:var(--teal);}
+  .remove-btn{background:transparent;border:1px solid var(--line-strong);color:var(--red);font-size:11px;padding:4px 8px;border-radius:3px;cursor:pointer;flex:none;width:auto;}
+  .remove-btn:hover{border-color:var(--red);}
+  .add-btn{background:transparent;border:1px dashed var(--line-strong);color:var(--teal);font-size:12px;padding:8px 12px;border-radius:3px;cursor:pointer;width:100%;margin-top:4px;}
+  .add-btn:hover{border-color:var(--teal);background:rgba(61,220,151,0.06);}
+
+  .preview-col{position:sticky;top:32px;align-self:start;}
+  .preview{background:#0a0d12;border:1px solid var(--line);border-radius:4px;overflow:hidden;}
+  .preview-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--panel2);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--text-dim);}
+  .dots{display:flex;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line-strong);}
+  pre#preview-code{margin:0;padding:16px;font-family:var(--mono);font-size:11px;line-height:1.6;color:#a8b3c4;max-height:520px;overflow:auto;direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;}
+  .actions{margin-top:16px;display:flex;gap:10px;}
+  button.primary{font-family:var(--sans);font-size:14px;font-weight:600;padding:12px 18px;border-radius:4px;border:none;cursor:pointer;flex:1;background:var(--amber);color:#1a1400;}
+  button.primary:hover{background:#ffc247;}
+  button.primary:active{transform:scale(0.98);}
+  .filename-field{margin-top:12px;}
+  .validation{font-family:var(--mono);font-size:11px;color:var(--red);margin-top:10px;min-height:14px;}
+  .checkbox-field label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);cursor:pointer;direction:ltr;}
+  .checkbox-field input[type="checkbox"]{width:auto;accent-color:var(--amber);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div>
+      <h1>مولّد Test Plan لـ <span style="direction:ltr;display:inline-block">JMeter</span></h1>
+      <p>Setup Login (once) + Main Thread Group (N users) — Sure QA</p>
+    </div>
+    <div class="status" id="statusBadge">READY</div>
+  </div>
+
+  <div class="grid">
+    <div class="form-col">
+
+      <div class="section">
+        <div class="section-title"><div class="left"><span class="n">1</span> <span class="title-text" contenteditable="false">بيئة النظام</span> <button type="button" class="icon-btn edit-btn">✎</button> <span class="info-icon">ⓘ<span class="tip">حدد هنا روابط النظام: رابط الـ Backend اللي هيستقبل طلب الـ Login، ورابط الـ Frontend اللي هتتصفح منه باقي الصفحات.</span></span></div></div>
+        <div class="section-body">
+          <div class="field"><label>Base URL — Frontend</label><input id="frontendDomain" value=""></div>
+          <div class="field"><label>Base URL — Backend / Login</label><input id="loginDomain" value=""></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <div class="left"><span class="n">2</span> <span class="title-text" contenteditable="false">Setup — بيشتغل مرة واحدة بس</span> <button type="button" class="icon-btn edit-btn">✎</button> <span class="info-icon">ⓘ<span class="tip">الطلبات هنا بتتنفذ مرة واحدة بس قبل بداية الاختبار، مش لكل مستخدم. استخدمها لعملية الـ Login وأي طلب تحضيري تاني محتاج يحصل مرة واحدة.</span></span></div>
+          <div class="section-note">Login + طلبات تحضيرية</div>
+        </div>
+        <div class="section-body">
+          <div class="item-card">
+            <div class="item-head"><span class="item-label">Login Request (أساسي)</span></div>
+            <div class="field"><label>Path</label><input id="loginPath" value="/api/login-by-criteria"></div>
+            <div class="row2">
+              <div class="field"><label>Email</label><input id="email" value=""></div>
+              <div class="field"><label>Password</label><input id="password" value=""></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label>Type</label><input id="loginType" value="email"></div>
+              <div class="field"><label>FCM</label><input id="fcm" value="fcm"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label>JSON Path لموقع الـ Token</label><input id="tokenPath" value="$.token"></div>
+              <div class="field"><label>اسم المتغير</label><input id="tokenVar" value="auth_token"></div>
+            </div>
+            <div class="hint">الـ Token بيتحفظ كـ Property مشترك، فهيتاخد مرة واحدة بغض النظر عن عدد المستخدمين في الـ Thread Group.</div>
+          </div>
+          <div id="setupExtraList"></div>
+          <button class="add-btn" id="addSetupBtn" type="button">+ إضافة طلب Setup إضافي</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><div class="left"><span class="n">3</span> <span class="title-text" contenteditable="false">Main Thread Group — عدد المستخدمين</span> <button type="button" class="icon-btn edit-btn">✎</button> <span class="info-icon">ⓘ<span class="tip">حدد هنا عدد المستخدمين اللي عايز تحاكيهم، والمدة اللي هيوصلوا فيها لأقصى عدد، وكام مرة هيتكرر السيناريو لكل واحد فيهم.</span></span></div></div>
+        <div class="section-body">
+          <div class="row3">
+            <div class="field"><div class="field-label-row"><label>Threads (Users)</label><span class="info-icon">ⓘ<span class="tip">عدد المستخدمين الوهميين اللي هيشتغلوا في نفس الوقت أثناء الاختبار.</span></span></div><input id="threads" type="number" min="1" value="1"></div>
+            <div class="field"><div class="field-label-row"><label>Ramp-up (sec)</label><span class="info-icon">ⓘ<span class="tip">المدة بالثواني اللي هيوصل فيها JMeter لتشغيل كل المستخدمين تدريجيًا. مثلاً 5 مستخدمين مع Ramp-up = 10 ثواني، يعني هيبدأ مستخدم كل 2 ثانية.</span></span></div><input id="rampup" type="number" min="1" value="1"></div>
+            <div class="field"><div class="field-label-row"><label>Loop Count</label><span class="info-icon">ⓘ<span class="tip">عدد مرات تكرار السيناريو (سكشن 4) لكل مستخدم قبل ما ينتهي.</span></span></div><input id="loops" type="number" min="1" value="1"></div>
+          </div>
+          <div class="hint">الأرقام دي بتخص السيناريو بس (تحت) — الـ Login مش هيتكرر عشانه.</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <div class="left"><span class="n">4</span> <span class="title-text" contenteditable="false">السيناريو — بيتكرر لكل مستخدم</span> <button type="button" class="icon-btn edit-btn">✎</button> <span class="info-icon">ⓘ<span class="tip">الطلبات هنا بتتكرر لكل مستخدم من المستخدمين اللي حددتهم فوق، زي تصفح الصفحة الرئيسية أو صفحة الاجتماعات.</span></span></div>
+          <div class="section-note">Home, Meetings, ...</div>
+        </div>
+        <div class="section-body">
+          <div id="scenarioList"></div>
+          <button class="add-btn" id="addScenarioBtn" type="button">+ إضافة طلب للسيناريو</button>
+          <button class="add-btn" id="importJmxBtn" type="button">⇪ إضافة سيناريو من ملف JMX</button>
+          <input type="file" id="importJmxInput" accept=".jmx,.xml" style="display:none">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><div class="left"><span class="n">5</span> <span class="title-text" contenteditable="false">Listeners — نوع التقارير</span> <button type="button" class="icon-btn edit-btn">✎</button> <span class="info-icon">ⓘ<span class="tip">اختار هنا شكل التقارير والنتائج اللي عايز تشوفها بعد ما الاختبار يخلص شغل.</span></span></div></div>
+        <div class="section-body">
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstViewTree" checked> View Results Tree</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstSummary" checked> Summary Report</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstAggregate"> Aggregate Report</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstGraph"> Graph Results</label></div>
+          <div class="hint">اختار واحد أو أكتر — هيتضافوا في الملف كـ Listeners على مستوى الـ Test Plan.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="preview-col">
+      <div class="preview">
+        <div class="preview-head"><span id="previewFileLabel">login_and_view_meetings.jmx</span><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+        <pre id="preview-code"></pre>
+      </div>
+      <div class="filename-field">
+        <div class="field"><label>اسم الملف عند التحميل</label><input id="fileName" value=""></div>
+      </div>
+      <div class="actions"><button class="primary" id="downloadBtn">تحميل ملف JMX ↓</button></div>
+      <div class="validation" id="validationMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.edit-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var span = btn.parentElement.querySelector('.title-text');
+    var editing = span.getAttribute('contenteditable') === 'true';
+    if(editing){
+      span.setAttribute('contenteditable','false');
+    } else {
+      span.setAttribute('contenteditable','true');
+      span.focus();
+    }
+  });
+});
+document.querySelectorAll('.title-text').forEach(function(span){
+  span.addEventListener('blur', function(){ span.setAttribute('contenteditable','false'); });
+  span.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); span.blur(); }
+  });
+});
+
+var setupExtra = [];
+var scenario = [
+  {name:'GET Home', domain:'frontend', method:'GET', path:'/', paramKey:'', paramVal:'', body:'', thinkTime:0}
+];
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function methodSelect(id, current){
+  var opts = ['GET','POST','PUT','DELETE'];
+  var html = '<select id="'+id+'">';
+  opts.forEach(function(o){ html += '<option value="'+o+'"'+(o===current?' selected':'')+'>'+o+'</option>'; });
+  html += '</select>';
+  return html;
+}
+
+function domainSelect(id, current){
+  return '<select id="'+id+'">' +
+    '<option value="frontend"'+(current==='frontend'?' selected':'')+'>Frontend</option>' +
+    '<option value="backend"'+(current==='backend'?' selected':'')+'>Backend/Login</option>' +
+    '</select>';
+}
+
+function renderSetupExtra(){
+  var el = document.getElementById('setupExtraList');
+  el.innerHTML = setupExtra.map(function(item, i){
+    return '<div class="item-card">' +
+      '<div class="item-head"><span class="item-label">Setup Request #'+(i+1)+'</span><button type="button" class="remove-btn" onclick="removeSetup('+i+')">حذف</button></div>' +
+      '<div class="row2">' +
+        '<div class="field"><label>Name</label><input data-kind="setup" data-i="'+i+'" data-f="name" value="'+esc(item.name)+'"></div>' +
+        '<div class="field"><label>Method</label>'+methodSelect('setupMethod'+i, item.method)+'</div>' +
+      '</div>' +
+      '<div class="field"><label>Path (backend)</label><input data-kind="setup" data-i="'+i+'" data-f="path" value="'+esc(item.path)+'"></div>' +
+      '<div class="field"><label>Body (JSON, اختياري)</label><textarea data-kind="setup" data-i="'+i+'" data-f="body">'+esc(item.body)+'</textarea></div>' +
+    '</div>';
+  }).join('');
+  setupExtra.forEach(function(item, i){
+    var sel = document.getElementById('setupMethod'+i);
+    if(sel) sel.addEventListener('change', function(){ setupExtra[i].method = sel.value; refresh(); });
+  });
+  el.querySelectorAll('input,textarea').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      var i = parseInt(inp.getAttribute('data-i'));
+      var f = inp.getAttribute('data-f');
+      setupExtra[i][f] = inp.value;
+      refresh();
+    });
+  });
+}
+
+function renderScenario(){
+  var el = document.getElementById('scenarioList');
+  el.innerHTML = scenario.map(function(item, i){
+    return '<div class="item-card">' +
+      '<div class="item-head"><span class="item-label">Request #'+(i+1)+'</span><button type="button" class="remove-btn" onclick="removeScenario('+i+')">حذف</button></div>' +
+      '<div class="row3">' +
+        '<div class="field"><label>Name</label><input data-kind="scn" data-i="'+i+'" data-f="name" value="'+esc(item.name)+'"></div>' +
+        '<div class="field"><label>Domain</label>'+domainSelect('scnDomain'+i, item.domain)+'</div>' +
+        '<div class="field"><label>Method</label>'+methodSelect('scnMethod'+i, item.method)+'</div>' +
+      '</div>' +
+      '<div class="field"><label>Path</label><input data-kind="scn" data-i="'+i+'" data-f="path" value="'+esc(item.path)+'"></div>' +
+      '<div class="row2">' +
+        '<div class="field"><label>Query Param — Key</label><input data-kind="scn" data-i="'+i+'" data-f="paramKey" value="'+esc(item.paramKey)+'"></div>' +
+        '<div class="field"><label>Query Param — Value</label><input data-kind="scn" data-i="'+i+'" data-f="paramVal" value="'+esc(item.paramVal)+'"></div>' +
+      '</div>' +
+      '<div class="field"><label>Body (JSON, اختياري لـ POST/PUT)</label><textarea data-kind="scn" data-i="'+i+'" data-f="body">'+esc(item.body)+'</textarea></div>' +
+      '<div class="field"><label>Think Time بعد الطلب ده (ms)</label><input data-kind="scn" data-i="'+i+'" data-f="thinkTime" type="number" min="0" value="'+item.thinkTime+'"></div>' +
+    '</div>';
+  }).join('');
+  scenario.forEach(function(item, i){
+    var selD = document.getElementById('scnDomain'+i);
+    var selM = document.getElementById('scnMethod'+i);
+    if(selD) selD.addEventListener('change', function(){ scenario[i].domain = selD.value; refresh(); });
+    if(selM) selM.addEventListener('change', function(){ scenario[i].method = selM.value; refresh(); });
+  });
+  el.querySelectorAll('input,textarea').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      var i = parseInt(inp.getAttribute('data-i'));
+      var f = inp.getAttribute('data-f');
+      var val = inp.type === 'number' ? (parseInt(inp.value)||0) : inp.value;
+      scenario[i][f] = val;
+      refresh();
+    });
+  });
+}
+
+function removeSetup(i){ setupExtra.splice(i,1); renderSetupExtra(); refresh(); }
+function removeScenario(i){ scenario.splice(i,1); renderScenario(); refresh(); }
+
+document.getElementById('addSetupBtn').addEventListener('click', function(){
+  setupExtra.push({name:'Setup Request', method:'GET', path:'', body:''});
+  renderSetupExtra(); refresh();
+});
+document.getElementById('addScenarioBtn').addEventListener('click', function(){
+  scenario.push({name:'New Request', domain:'frontend', method:'GET', path:'', paramKey:'', paramVal:'', body:'', thinkTime:0});
+  renderScenario(); refresh();
+});
+
+function getChildText(el, tag, name){
+  var kids = el.children;
+  for(var i=0;i<kids.length;i++){
+    if(kids[i].tagName === tag && kids[i].getAttribute('name') === name){
+      return kids[i].textContent;
+    }
+  }
+  return '';
+}
+
+function findChildElementProp(el, name){
+  var kids = el.children;
+  for(var i=0;i<kids.length;i++){
+    if(kids[i].tagName === 'elementProp' && kids[i].getAttribute('name') === name){
+      return kids[i];
+    }
+  }
+  return null;
+}
+
+function samplerToScenarioItem(s){
+  var name = s.getAttribute('testname') || 'Imported Request';
+  var domainRaw = getChildText(s,'stringProp','HTTPSampler.domain');
+  var path = getChildText(s,'stringProp','HTTPSampler.path');
+  var method = getChildText(s,'stringProp','HTTPSampler.method') || 'GET';
+  var fe = document.getElementById('frontendDomain').value.trim();
+  var be = document.getElementById('loginDomain').value.trim();
+  var domain = (domainRaw === be) ? 'backend' : 'frontend';
+
+  var paramKey='', paramVal='', body='';
+  var argsElProp = findChildElementProp(s, 'HTTPsampler.Arguments');
+  if(argsElProp){
+    var coll = null;
+    var ch = argsElProp.children;
+    for(var i=0;i<ch.length;i++){ if(ch[i].tagName==='collectionProp'){ coll = ch[i]; break; } }
+    if(coll && coll.children.length){
+      var a = coll.children[0];
+      var aName = getChildText(a,'stringProp','Argument.name');
+      var aVal = getChildText(a,'stringProp','Argument.value');
+      if(aName){ paramKey = aName; paramVal = aVal; } else { body = aVal; }
+    }
+  }
+
+  var thinkTime = 0;
+  var next = s.nextElementSibling;
+  if(next && next.tagName === 'hashTree'){
+    var kids = next.children;
+    for(var j=0;j<kids.length;j++){
+      if(kids[j].tagName === 'ConstantTimer'){
+        thinkTime = parseInt(getChildText(kids[j],'stringProp','ConstantTimer.delay')) || 0;
+        break;
+      }
+    }
+  }
+  if(!domainRaw) domain = 'frontend';
+  return {name:name, domain:domain, method:(method||'GET').toUpperCase(), path:path, paramKey:paramKey, paramVal:paramVal, body:body, thinkTime:thinkTime};
+}
+
+document.getElementById('importJmxBtn').addEventListener('click', function(){
+  document.getElementById('importJmxInput').click();
+});
+
+document.getElementById('importJmxInput').addEventListener('change', function(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(evt){
+    try {
+      var parser = new DOMParser();
+      var doc = parser.parseFromString(evt.target.result, 'application/xml');
+      if(doc.querySelector('parsererror')){
+        alert('الملف ده مش XML صحيح، اتأكد إنه ملف JMX سليم.');
+        e.target.value = '';
+        return;
+      }
+      var samplers = doc.getElementsByTagName('HTTPSamplerProxy');
+      if(!samplers.length){
+        alert('مفيش HTTP Requests في الملف ده.');
+        e.target.value = '';
+        return;
+      }
+      var added = 0;
+      for(var i=0;i<samplers.length;i++){
+        scenario.push(samplerToScenarioItem(samplers[i]));
+        added++;
+      }
+      renderScenario();
+      refresh();
+      alert('اتضاف ' + added + ' طلب من الملف في نهاية السيناريو. راجعهم وعدّل أي حاجة محتاجة تعديل (زي الـ Login لو اتضاف بالغلط).');
+    } catch(err){
+      alert('حصل خطأ أثناء قراءة الملف: ' + err.message);
+    }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
+function buildBody(email,password,type,fcm){
+  return JSON.stringify({fcm:fcm,type:type,password:password,email:email});
+}
+
+function requestBlock(item, domainVal){
+  var argBlock = '';
+  var hasBody = item.body && item.body.trim().length && (item.method === 'POST' || item.method === 'PUT');
+  var hasParam = item.paramKey && item.paramKey.trim().length;
+  if(hasBody){
+    argBlock =
+'          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">\n' +
+'            <collectionProp name="Arguments.arguments">\n' +
+'              <elementProp name="" elementType="HTTPArgument">\n' +
+'                <boolProp name="HTTPArgument.always_encode">false</boolProp>\n' +
+'                <stringProp name="Argument.value">' + esc(item.body) + '</stringProp>\n' +
+'                <stringProp name="Argument.metadata">=</stringProp>\n' +
+'              </elementProp>\n' +
+'            </collectionProp>\n' +
+'          </elementProp>\n' +
+'          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>\n';
+  } else if(hasParam){
+    argBlock =
+'          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">\n' +
+'            <collectionProp name="Arguments.arguments">\n' +
+'              <elementProp name="'+esc(item.paramKey)+'" elementType="HTTPArgument">\n' +
+'                <boolProp name="HTTPArgument.always_encode">false</boolProp>\n' +
+'                <stringProp name="Argument.name">'+esc(item.paramKey)+'</stringProp>\n' +
+'                <stringProp name="Argument.value">'+esc(item.paramVal)+'</stringProp>\n' +
+'                <stringProp name="Argument.metadata">=</stringProp>\n' +
+'              </elementProp>\n' +
+'            </collectionProp>\n' +
+'          </elementProp>\n';
+  } else {
+    argBlock =
+'          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">\n' +
+'            <collectionProp name="Arguments.arguments"/>\n' +
+'          </elementProp>\n';
+  }
+  return '        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="'+esc(item.name)+'" enabled="true">\n' +
+argBlock +
+'          <stringProp name="HTTPSampler.domain">' + esc(domainVal) + '</stringProp>\n' +
+'          <stringProp name="HTTPSampler.protocol">https</stringProp>\n' +
+'          <stringProp name="HTTPSampler.path">' + esc(item.path) + '</stringProp>\n' +
+'          <stringProp name="HTTPSampler.method">' + esc(item.method) + '</stringProp>\n' +
+'          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>\n' +
+'          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>\n' +
+'        </HTTPSamplerProxy>\n';
+}
+
+var LISTENER_DEFS = {
+  viewTree: {guiclass:'ViewResultsFullVisualizer', testname:'View Results Tree'},
+  summary: {guiclass:'SummaryReport', testname:'Summary Report'},
+  aggregate: {guiclass:'StatVisualizer', testname:'Aggregate Report'},
+  graph: {guiclass:'GraphVisualizer', testname:'Graph Results'}
+};
+
+function buildListenerBlocks(selected){
+  return selected.map(function(key){
+    var def = LISTENER_DEFS[key];
+    if(!def) return '';
+    return '      <ResultCollector guiclass="'+def.guiclass+'" testclass="ResultCollector" testname="'+def.testname+'" enabled="true">\n' +
+'        <boolProp name="ResultCollector.error_logging">false</boolProp>\n' +
+'        <stringProp name="filename"></stringProp>\n' +
+'      </ResultCollector>\n' +
+'      <hashTree/>\n';
+  }).join('');
+}
+
+function buildJMX(v){
+  var bodyJson = buildBody(v.email, v.password, v.loginType, v.fcm);
+  var authHeaderValue = 'Bearer ${__property(' + v.tokenVar + ')}';
+
+  var setupExtraBlocks = setupExtra.map(function(item){
+    return requestBlock(item, v.loginDomain) + '        <hashTree/>\n';
+  }).join('');
+
+  var scenarioBlocks = scenario.map(function(item){
+    var domainVal = item.domain === 'backend' ? v.loginDomain : v.frontendDomain;
+    var block = requestBlock(item, domainVal);
+    if(item.thinkTime && item.thinkTime > 0){
+      block += '        <hashTree>\n' +
+'          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think Time" enabled="true">\n' +
+'            <stringProp name="ConstantTimer.delay">' + item.thinkTime + '</stringProp>\n' +
+'          </ConstantTimer>\n' +
+'          <hashTree/>\n' +
+'        </hashTree>\n';
+    } else {
+      block += '        <hashTree/>\n';
+    }
+    return block;
+  }).join('');
+
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+'<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">\n' +
+'  <hashTree>\n' +
+'    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Login and View Meetings" enabled="true">\n' +
+'      <stringProp name="TestPlan.comments">Generated by JMX Test Plan Builder</stringProp>\n' +
+'      <boolProp name="TestPlan.functional_mode">false</boolProp>\n' +
+'      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>\n' +
+'      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">\n' +
+'        <collectionProp name="Arguments.arguments"/>\n' +
+'      </elementProp>\n' +
+'    </TestPlan>\n' +
+'    <hashTree>\n' +
+'      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">\n' +
+'        <collectionProp name="CookieManager.cookies"/>\n' +
+'        <boolProp name="CookieManager.clearEachIteration">true</boolProp>\n' +
+'        <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>\n' +
+'      </CookieManager>\n' +
+'      <hashTree/>\n' +
+
+'      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="Setup - Login (Once)" enabled="true">\n' +
+'        <stringProp name="ThreadGroup.on_sample_error">stopthread</stringProp>\n' +
+'        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">\n' +
+'          <boolProp name="LoopController.continue_forever">false</boolProp>\n' +
+'          <stringProp name="LoopController.loops">1</stringProp>\n' +
+'        </elementProp>\n' +
+'        <stringProp name="ThreadGroup.num_threads">1</stringProp>\n' +
+'        <stringProp name="ThreadGroup.ramp_time">1</stringProp>\n' +
+'        <boolProp name="ThreadGroup.scheduler">false</boolProp>\n' +
+'      </SetupThreadGroup>\n' +
+'      <hashTree>\n' +
+'        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST Login" enabled="true">\n' +
+'          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">\n' +
+'            <collectionProp name="Arguments.arguments">\n' +
+'              <elementProp name="" elementType="HTTPArgument">\n' +
+'                <boolProp name="HTTPArgument.always_encode">false</boolProp>\n' +
+'                <stringProp name="Argument.value">' + esc(bodyJson) + '</stringProp>\n' +
+'                <stringProp name="Argument.metadata">=</stringProp>\n' +
+'              </elementProp>\n' +
+'            </collectionProp>\n' +
+'          </elementProp>\n' +
+'          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>\n' +
+'          <stringProp name="HTTPSampler.domain">' + esc(v.loginDomain) + '</stringProp>\n' +
+'          <stringProp name="HTTPSampler.protocol">https</stringProp>\n' +
+'          <stringProp name="HTTPSampler.path">' + esc(v.loginPath) + '</stringProp>\n' +
+'          <stringProp name="HTTPSampler.method">POST</stringProp>\n' +
+'          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>\n' +
+'          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>\n' +
+'        </HTTPSamplerProxy>\n' +
+'        <hashTree>\n' +
+'          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">\n' +
+'            <collectionProp name="HeaderManager.headers">\n' +
+'              <elementProp name="" elementType="Header">\n' +
+'                <stringProp name="Header.name">Content-Type</stringProp>\n' +
+'                <stringProp name="Header.value">application/json</stringProp>\n' +
+'              </elementProp>\n' +
+'            </collectionProp>\n' +
+'          </HeaderManager>\n' +
+'          <hashTree/>\n' +
+'          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert Response Code 200" enabled="true">\n' +
+'            <collectionProp name="Assertion.test_strings">\n' +
+'              <stringProp name="49586">200</stringProp>\n' +
+'            </collectionProp>\n' +
+'            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>\n' +
+'            <boolProp name="Assertion.assume_success">false</boolProp>\n' +
+'            <intProp name="Assertion.test_type">8</intProp>\n' +
+'          </ResponseAssertion>\n' +
+'          <hashTree/>\n' +
+'          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="Extract Token" enabled="true">\n' +
+'            <stringProp name="JSONPostProcessor.referenceNames">' + esc(v.tokenVar) + '</stringProp>\n' +
+'            <stringProp name="JSONPostProcessor.jsonPathExprs">' + esc(v.tokenPath) + '</stringProp>\n' +
+'            <stringProp name="JSONPostProcessor.match_numbers">1</stringProp>\n' +
+'            <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>\n' +
+'          </JSONPostProcessor>\n' +
+'          <hashTree/>\n' +
+'          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Save Token to Property" enabled="true">\n' +
+'            <stringProp name="scriptLanguage">groovy</stringProp>\n' +
+'            <stringProp name="script">props.put("' + esc(v.tokenVar) + '", vars.get("' + esc(v.tokenVar) + '"));</stringProp>\n' +
+'          </JSR223PostProcessor>\n' +
+'          <hashTree/>\n' +
+'        </hashTree>\n' +
+setupExtraBlocks +
+'      </hashTree>\n' +
+
+'      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Main Thread Group" enabled="true">\n' +
+'        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>\n' +
+'        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">\n' +
+'          <boolProp name="LoopController.continue_forever">false</boolProp>\n' +
+'          <stringProp name="LoopController.loops">' + v.loops + '</stringProp>\n' +
+'        </elementProp>\n' +
+'        <stringProp name="ThreadGroup.num_threads">' + v.threads + '</stringProp>\n' +
+'        <stringProp name="ThreadGroup.ramp_time">' + v.rampup + '</stringProp>\n' +
+'        <boolProp name="ThreadGroup.scheduler">false</boolProp>\n' +
+'        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>\n' +
+'      </ThreadGroup>\n' +
+'      <hashTree>\n' +
+'        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Authorization Header" enabled="true">\n' +
+'          <collectionProp name="HeaderManager.headers">\n' +
+'            <elementProp name="" elementType="Header">\n' +
+'              <stringProp name="Header.name">Authorization</stringProp>\n' +
+'              <stringProp name="Header.value">' + esc(authHeaderValue) + '</stringProp>\n' +
+'            </elementProp>\n' +
+'          </collectionProp>\n' +
+'        </HeaderManager>\n' +
+'        <hashTree/>\n' +
+'        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="Test" enabled="true">\n' +
+'          <boolProp name="TransactionController.includeTimers">false</boolProp>\n' +
+'        </TransactionController>\n' +
+'        <hashTree>\n' +
+scenarioBlocks +
+'        </hashTree>\n' +
+'      </hashTree>\n' +
+
+buildListenerBlocks(v.listeners) +
+'    </hashTree>\n' +
+'  </hashTree>\n' +
+'</jmeterTestPlan>\n';
+}
+
+function collectValues(){
+  return {
+    loginDomain: document.getElementById('loginDomain').value.trim(),
+    frontendDomain: document.getElementById('frontendDomain').value.trim(),
+    threads: parseInt(document.getElementById('threads').value) || 1,
+    rampup: parseInt(document.getElementById('rampup').value) || 1,
+    loops: parseInt(document.getElementById('loops').value) || 1,
+    loginPath: document.getElementById('loginPath').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    password: document.getElementById('password').value,
+    loginType: document.getElementById('loginType').value.trim(),
+    fcm: document.getElementById('fcm').value.trim(),
+    tokenPath: document.getElementById('tokenPath').value.trim(),
+    tokenVar: document.getElementById('tokenVar').value.trim() || 'auth_token',
+    listeners: collectListeners()
+  };
+}
+
+function collectListeners(){
+  var out = [];
+  if(document.getElementById('lstViewTree').checked) out.push('viewTree');
+  if(document.getElementById('lstSummary').checked) out.push('summary');
+  if(document.getElementById('lstAggregate').checked) out.push('aggregate');
+  if(document.getElementById('lstGraph').checked) out.push('graph');
+  return out;
+}
+
+function validate(v){
+  var errs = [];
+  if(!v.loginDomain) errs.push('Base URL (Login) مطلوب');
+  if(!v.frontendDomain) errs.push('Base URL (Frontend) مطلوب');
+  if(!v.loginPath) errs.push('Login Path مطلوب');
+  if(!v.email) errs.push('Email مطلوب');
+  if(!v.tokenPath) errs.push('Token JSON Path مطلوب');
+  if(!scenario.length) errs.push('لازم طلب واحد على الأقل في السيناريو');
+  if(!v.listeners.length) errs.push('لازم تختار Listener واحد على الأقل');
+  return errs;
+}
+
+function refresh(){
+  var v = collectValues();
+  var errs = validate(v);
+  var msg = document.getElementById('validationMsg');
+  var badge = document.getElementById('statusBadge');
+  if(errs.length){
+    msg.textContent = errs.join(' · ');
+    badge.textContent = 'INCOMPLETE';
+    badge.style.color = 'var(--red)'; badge.style.borderColor = '#7a2b2b'; badge.style.background = 'rgba(255,80,80,0.08)';
+  } else {
+    msg.textContent = '';
+    badge.textContent = 'READY';
+    badge.style.color = 'var(--teal)'; badge.style.borderColor = 'var(--teal-dim)'; badge.style.background = 'rgba(61,220,151,0.08)';
+  }
+  var xml = buildJMX(v);
+  document.getElementById('preview-code').textContent = xml;
+  return {v:v, errs:errs, xml:xml};
+}
+
+document.querySelectorAll('.section-body > .field input, .section-body > .field textarea, .section-body > .row2 input, .section-body > .row3 input').forEach(function(el){
+  el.addEventListener('input', refresh);
+});
+document.querySelectorAll('.checkbox-field input[type="checkbox"]').forEach(function(el){
+  el.addEventListener('change', refresh);
+});
+
+document.getElementById('downloadBtn').addEventListener('click', function(){
+  var r = refresh();
+  if(r.errs.length){ alert('فيه حقول ناقصة:\n' + r.errs.join('\n')); return; }
+  var fname = document.getElementById('fileName').value.trim();
+  if(!fname){ alert('يرجى إدخال اسم الملف'); return; }
+  var blob = new Blob([r.xml], {type:'application/xml'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+renderSetupExtra();
+renderScenario();
+refresh();
+</script>
+</body>
+</html>
