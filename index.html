@@ -61,7 +61,7 @@
   .add-btn{background:transparent;border:1px dashed var(--line-strong);color:var(--teal);font-size:12px;padding:8px 12px;border-radius:3px;cursor:pointer;width:100%;margin-top:4px;}
   .add-btn:hover{border-color:var(--teal);background:rgba(61,220,151,0.06);}
 
-  .actions-col{max-width:520px;}
+  .actions-col{width:100%;}
   .preview{background:#0a0d12;border:1px solid var(--line);border-radius:4px;overflow:hidden;}
   .preview-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--panel2);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--text-dim);}
   .dots{display:flex;gap:6px;}
@@ -102,11 +102,18 @@
       <div class="section">
         <div class="section-title">
           <div class="left"><span class="n">2</span> <span class="title-text" contenteditable="false">Setup — بيشتغل مرة واحدة بس</span> <button type="button" class="icon-btn edit-btn">✎</button> <span class="info-icon">ⓘ<span class="tip">الطلبات هنا بتتنفذ مرة واحدة بس قبل بداية الاختبار، مش لكل مستخدم. استخدمها لعملية الـ Login وأي طلب تحضيري تاني محتاج يحصل مرة واحدة.</span></span></div>
-          <div class="section-note">Login + طلبات تحضيرية</div>
+          <div class="section-note" id="setupBreadcrumb">Login</div>
         </div>
         <div class="section-body">
           <div class="item-card">
-            <div class="item-head"><span class="item-label">Login Request (أساسي)</span></div>
+            <div class="item-head">
+              <span class="item-label">Login Request (أساسي)</span>
+              <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);cursor:pointer;direction:ltr;">
+                <input type="checkbox" id="setupLoginEnabled" checked style="width:auto;accent-color:var(--amber);">
+                تفعيل Login هنا (مرة واحدة)
+              </label>
+            </div>
+            <div id="loginFieldsBlock">
             <div class="field"><label>Path</label><input id="loginPath" value="/api/login-by-criteria"></div>
             <div class="row2">
               <div class="field"><label>Email</label><input id="email" value=""></div>
@@ -121,6 +128,8 @@
               <div class="field"><label>اسم المتغير</label><input id="tokenVar" value="auth_token"></div>
             </div>
             <div class="hint">الـ Token بيتحفظ كـ Property مشترك، فهيتاخد مرة واحدة بغض النظر عن عدد المستخدمين في الـ Thread Group.</div>
+            </div>
+            <div class="hint" id="loginDisabledHint" style="display:none;">الـ Login متعطّل هنا — لو رفعت ملف JMX فيه Login وعايزه يتكرر لكل مستخدم، ضيفه بنفسك في سكشن السيناريو (4) بدل ما يتضاف هنا.</div>
           </div>
           <div id="setupExtraList"></div>
           <button class="add-btn" id="addSetupBtn" type="button">+ إضافة طلب Setup إضافي</button>
@@ -141,8 +150,8 @@
 
       <div class="section">
         <div class="section-title">
-          <div class="left"><span class="n">4</span> <span class="title-text" contenteditable="false">السيناريو — بيتكرر لكل مستخدم</span> <button type="button" class="icon-btn edit-btn">✎</button> <span class="info-icon">ⓘ<span class="tip">الطلبات هنا بتتكرر لكل مستخدم من المستخدمين اللي حددتهم فوق، زي تصفح الصفحة الرئيسية أو صفحة الاجتماعات.</span></span></div>
-          <div class="section-note">Home, Meetings, ...</div>
+          <div class="left"><span class="n">4</span> <span class="title-text" contenteditable="false">السيناريو — بيتكرر لكل مستخدم</span> <button type="button" class="icon-btn edit-btn">✎</button> <span class="info-icon">ⓘ<span class="tip">الطلبات هنا هي الرحلة الفعلية اللي هيمشي فيها كل مستخدم داخل النظام — أي عدد صفحات أو Endpoints تحبه، بأي ترتيب، وبتتكرر لكل مستخدم من المستخدمين اللي حددتهم فوق.</span></span></div>
+          <div class="section-note" id="scenarioBreadcrumb">Home</div>
         </div>
         <div class="section-body">
           <div id="scenarioList"></div>
@@ -153,7 +162,7 @@
       </div>
 
       <div class="section">
-        <div class="section-title"><div class="left"><span class="n">5</span> <span class="title-text" contenteditable="false">Listeners — نوع التقارير</span> <button type="button" class="icon-btn edit-btn">✎</button> <span class="info-icon">ⓘ<span class="tip">اختار هنا شكل التقارير والنتائج اللي عايز تشوفها بعد ما الاختبار يخلص شغل.</span></span></div></div>
+        <div class="section-title"><div class="left"><span class="n">5</span> <span class="title-text" contenteditable="false">Listeners — نوع التقارير</span> <button type="button" class="icon-btn edit-btn">✎</button> <span class="info-icon">ⓘ<span class="tip">اختار هنا شكل التقارير والنتائج اللي عايز تشوفها بعد ما الاختبار يخلص شغل. اختار واحد أو أكتر — هيتضافوا في الملف كـ Listeners على مستوى الـ Test Plan.</span></span></div></div>
         <div class="section-body">
           <div class="field checkbox-field"><label><input type="checkbox" id="lstViewTree" checked> View Results Tree</label></div>
           <div class="field checkbox-field"><label><input type="checkbox" id="lstViewTable"> View Results in Table</label></div>
@@ -170,7 +179,6 @@
           <div class="field checkbox-field"><label><input type="checkbox" id="lstTps"> Transactions per Second</label></div>
           <div class="field checkbox-field"><label><input type="checkbox" id="lstHps"> Hits per Second</label></div>
           <div class="field checkbox-field"><label><input type="checkbox" id="lstBytesThroughput"> Bytes Throughput Over Time</label></div>
-          <div class="hint">اختار واحد أو أكتر — هيتضافوا في الملف كـ Listeners على مستوى الـ Test Plan.</div>
         </div>
       </div>
 
@@ -207,6 +215,14 @@ document.querySelectorAll('.title-text').forEach(function(span){
   });
 });
 
+document.getElementById('setupLoginEnabled').addEventListener('change', function(){
+  var enabled = this.checked;
+  document.getElementById('loginFieldsBlock').style.display = enabled ? '' : 'none';
+  document.getElementById('loginDisabledHint').style.display = enabled ? 'none' : '';
+  updateSetupBreadcrumb();
+  refresh();
+});
+
 var setupExtra = [];
 var scenario = [
   {name:'GET Home', domain:'frontend', method:'GET', path:'/', paramKey:'', paramVal:'', body:'', thinkTime:0}
@@ -229,6 +245,15 @@ function domainSelect(id, current){
     '<option value="frontend"'+(current==='frontend'?' selected':'')+'>Frontend</option>' +
     '<option value="backend"'+(current==='backend'?' selected':'')+'>Backend/Login</option>' +
     '</select>';
+}
+
+function updateSetupBreadcrumb(){
+  var el = document.getElementById('setupBreadcrumb');
+  if(!el) return;
+  var names = [];
+  if(document.getElementById('setupLoginEnabled').checked) names.push('Login');
+  setupExtra.forEach(function(item){ names.push(item.name || 'Request'); });
+  el.textContent = names.length ? names.join(', ') : 'مفيش طلبات لسه';
 }
 
 function renderSetupExtra(){
@@ -254,8 +279,16 @@ function renderSetupExtra(){
       var f = inp.getAttribute('data-f');
       setupExtra[i][f] = inp.value;
       refresh();
+      updateSetupBreadcrumb();
     });
   });
+  updateSetupBreadcrumb();
+}
+
+function updateScenarioBreadcrumb(){
+  var el = document.getElementById('scenarioBreadcrumb');
+  if(!el) return;
+  el.textContent = scenario.length ? scenario.map(function(item){ return item.name || 'Request'; }).join(', ') : 'مفيش طلبات لسه';
 }
 
 function renderScenario(){
@@ -290,8 +323,10 @@ function renderScenario(){
       var val = inp.type === 'number' ? (parseInt(inp.value)||0) : inp.value;
       scenario[i][f] = val;
       refresh();
+      updateScenarioBreadcrumb();
     });
   });
+  updateScenarioBreadcrumb();
 }
 
 function removeSetup(i){ setupExtra.splice(i,1); renderSetupExtra(); refresh(); }
@@ -489,52 +524,9 @@ function buildJMX(v){
     return requestBlock(item, v.loginDomain) + '        <hashTree/>\n';
   }).join('');
 
-  var scenarioBlocks = scenario.map(function(item){
-    var domainVal = item.domain === 'backend' ? v.loginDomain : v.frontendDomain;
-    var block = requestBlock(item, domainVal);
-    if(item.thinkTime && item.thinkTime > 0){
-      block += '        <hashTree>\n' +
-'          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think Time" enabled="true">\n' +
-'            <stringProp name="ConstantTimer.delay">' + item.thinkTime + '</stringProp>\n' +
-'          </ConstantTimer>\n' +
-'          <hashTree/>\n' +
-'        </hashTree>\n';
-    } else {
-      block += '        <hashTree/>\n';
-    }
-    return block;
-  }).join('');
-
-  return '<?xml version="1.0" encoding="UTF-8"?>\n' +
-'<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">\n' +
-'  <hashTree>\n' +
-'    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Login and View Meetings" enabled="true">\n' +
-'      <stringProp name="TestPlan.comments">Generated by JMX Test Plan Builder</stringProp>\n' +
-'      <boolProp name="TestPlan.functional_mode">false</boolProp>\n' +
-'      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>\n' +
-'      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">\n' +
-'        <collectionProp name="Arguments.arguments"/>\n' +
-'      </elementProp>\n' +
-'    </TestPlan>\n' +
-'    <hashTree>\n' +
-'      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">\n' +
-'        <collectionProp name="CookieManager.cookies"/>\n' +
-'        <boolProp name="CookieManager.clearEachIteration">true</boolProp>\n' +
-'        <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>\n' +
-'      </CookieManager>\n' +
-'      <hashTree/>\n' +
-
-'      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="Setup - Login (Once)" enabled="true">\n' +
-'        <stringProp name="ThreadGroup.on_sample_error">stopthread</stringProp>\n' +
-'        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">\n' +
-'          <boolProp name="LoopController.continue_forever">false</boolProp>\n' +
-'          <stringProp name="LoopController.loops">1</stringProp>\n' +
-'        </elementProp>\n' +
-'        <stringProp name="ThreadGroup.num_threads">1</stringProp>\n' +
-'        <stringProp name="ThreadGroup.ramp_time">1</stringProp>\n' +
-'        <boolProp name="ThreadGroup.scheduler">false</boolProp>\n' +
-'      </SetupThreadGroup>\n' +
-'      <hashTree>\n' +
+  var loginBlock = '';
+  if(v.loginEnabled){
+    loginBlock =
 '        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST Login" enabled="true">\n' +
 '          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">\n' +
 '            <collectionProp name="Arguments.arguments">\n' +
@@ -584,10 +576,77 @@ function buildJMX(v){
 '            <stringProp name="script">props.put("' + esc(v.tokenVar) + '", vars.get("' + esc(v.tokenVar) + '"));</stringProp>\n' +
 '          </JSR223PostProcessor>\n' +
 '          <hashTree/>\n' +
-'        </hashTree>\n' +
-setupExtraBlocks +
-'      </hashTree>\n' +
+'        </hashTree>\n';
+  }
 
+  var setupBlock = '';
+  if(v.loginEnabled || setupExtra.length){
+    setupBlock =
+'      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="Setup - Login (Once)" enabled="true">\n' +
+'        <stringProp name="ThreadGroup.on_sample_error">stopthread</stringProp>\n' +
+'        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">\n' +
+'          <boolProp name="LoopController.continue_forever">false</boolProp>\n' +
+'          <stringProp name="LoopController.loops">1</stringProp>\n' +
+'        </elementProp>\n' +
+'        <stringProp name="ThreadGroup.num_threads">1</stringProp>\n' +
+'        <stringProp name="ThreadGroup.ramp_time">1</stringProp>\n' +
+'        <boolProp name="ThreadGroup.scheduler">false</boolProp>\n' +
+'      </SetupThreadGroup>\n' +
+'      <hashTree>\n' +
+loginBlock +
+setupExtraBlocks +
+'      </hashTree>\n';
+  }
+
+  var authHeaderBlock = '';
+  if(v.loginEnabled){
+    authHeaderBlock =
+'        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Authorization Header" enabled="true">\n' +
+'          <collectionProp name="HeaderManager.headers">\n' +
+'            <elementProp name="" elementType="Header">\n' +
+'              <stringProp name="Header.name">Authorization</stringProp>\n' +
+'              <stringProp name="Header.value">' + esc(authHeaderValue) + '</stringProp>\n' +
+'            </elementProp>\n' +
+'          </collectionProp>\n' +
+'        </HeaderManager>\n' +
+'        <hashTree/>\n';
+  }
+
+  var scenarioBlocks = scenario.map(function(item){
+    var domainVal = item.domain === 'backend' ? v.loginDomain : v.frontendDomain;
+    var block = requestBlock(item, domainVal);
+    if(item.thinkTime && item.thinkTime > 0){
+      block += '        <hashTree>\n' +
+'          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think Time" enabled="true">\n' +
+'            <stringProp name="ConstantTimer.delay">' + item.thinkTime + '</stringProp>\n' +
+'          </ConstantTimer>\n' +
+'          <hashTree/>\n' +
+'        </hashTree>\n';
+    } else {
+      block += '        <hashTree/>\n';
+    }
+    return block;
+  }).join('');
+
+  return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+'<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">\n' +
+'  <hashTree>\n' +
+'    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Login and View Meetings" enabled="true">\n' +
+'      <stringProp name="TestPlan.comments">Generated by JMX Test Plan Builder</stringProp>\n' +
+'      <boolProp name="TestPlan.functional_mode">false</boolProp>\n' +
+'      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>\n' +
+'      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">\n' +
+'        <collectionProp name="Arguments.arguments"/>\n' +
+'      </elementProp>\n' +
+'    </TestPlan>\n' +
+'    <hashTree>\n' +
+'      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">\n' +
+'        <collectionProp name="CookieManager.cookies"/>\n' +
+'        <boolProp name="CookieManager.clearEachIteration">true</boolProp>\n' +
+'        <boolProp name="CookieManager.controlledByThreadGroup">false</boolProp>\n' +
+'      </CookieManager>\n' +
+'      <hashTree/>\n' +
+setupBlock +
 '      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Main Thread Group" enabled="true">\n' +
 '        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>\n' +
 '        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">\n' +
@@ -600,15 +659,7 @@ setupExtraBlocks +
 '        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>\n' +
 '      </ThreadGroup>\n' +
 '      <hashTree>\n' +
-'        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Authorization Header" enabled="true">\n' +
-'          <collectionProp name="HeaderManager.headers">\n' +
-'            <elementProp name="" elementType="Header">\n' +
-'              <stringProp name="Header.name">Authorization</stringProp>\n' +
-'              <stringProp name="Header.value">' + esc(authHeaderValue) + '</stringProp>\n' +
-'            </elementProp>\n' +
-'          </collectionProp>\n' +
-'        </HeaderManager>\n' +
-'        <hashTree/>\n' +
+authHeaderBlock +
 '        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="Test" enabled="true">\n' +
 '          <boolProp name="TransactionController.includeTimers">false</boolProp>\n' +
 '        </TransactionController>\n' +
@@ -637,6 +688,7 @@ function collectValues(){
     fcm: document.getElementById('fcm').value.trim(),
     tokenPath: document.getElementById('tokenPath').value.trim(),
     tokenVar: document.getElementById('tokenVar').value.trim() || 'auth_token',
+    loginEnabled: document.getElementById('setupLoginEnabled').checked,
     listeners: collectListeners()
   };
 }
@@ -664,9 +716,11 @@ function validate(v){
   var errs = [];
   if(!v.loginDomain) errs.push('Base URL (Login) مطلوب');
   if(!v.frontendDomain) errs.push('Base URL (Frontend) مطلوب');
-  if(!v.loginPath) errs.push('Login Path مطلوب');
-  if(!v.email) errs.push('Email مطلوب');
-  if(!v.tokenPath) errs.push('Token JSON Path مطلوب');
+  if(v.loginEnabled){
+    if(!v.loginPath) errs.push('Login Path مطلوب');
+    if(!v.email) errs.push('Email مطلوب');
+    if(!v.tokenPath) errs.push('Token JSON Path مطلوب');
+  }
   if(!scenario.length) errs.push('لازم طلب واحد على الأقل في السيناريو');
   if(!v.listeners.length) errs.push('لازم تختار Listener واحد على الأقل');
   return errs;
