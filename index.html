@@ -27,8 +27,7 @@
   .head h1{font-size:22px;font-weight:600;margin:0 0 6px 0;}
   .head p{margin:0;color:var(--text-dim);font-size:13px;direction:ltr;text-align:right;unicode-bidi:plaintext;}
   .status{font-family:var(--mono);font-size:11px;color:var(--teal);border:1px solid var(--teal-dim);background:rgba(61,220,151,0.08);padding:4px 10px;border-radius:2px;white-space:nowrap;}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
-  @media (max-width:900px){ .grid{grid-template-columns:1fr;} }
+  .grid{display:block;}
   .section{background:var(--panel);border:1px solid var(--line);border-radius:4px;margin-bottom:18px;overflow:hidden;}
   .section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:var(--panel2);border-bottom:1px solid var(--line);font-size:13px;font-weight:600;color:var(--amber);}
   .section-title .left{display:flex;align-items:center;gap:10px;}
@@ -62,7 +61,7 @@
   .add-btn{background:transparent;border:1px dashed var(--line-strong);color:var(--teal);font-size:12px;padding:8px 12px;border-radius:3px;cursor:pointer;width:100%;margin-top:4px;}
   .add-btn:hover{border-color:var(--teal);background:rgba(61,220,151,0.06);}
 
-  .preview-col{position:sticky;top:32px;align-self:start;}
+  .actions-col{max-width:520px;}
   .preview{background:#0a0d12;border:1px solid var(--line);border-radius:4px;overflow:hidden;}
   .preview-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--panel2);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--text-dim);}
   .dots{display:flex;gap:6px;}
@@ -157,25 +156,33 @@
         <div class="section-title"><div class="left"><span class="n">5</span> <span class="title-text" contenteditable="false">Listeners — نوع التقارير</span> <button type="button" class="icon-btn edit-btn">✎</button> <span class="info-icon">ⓘ<span class="tip">اختار هنا شكل التقارير والنتائج اللي عايز تشوفها بعد ما الاختبار يخلص شغل.</span></span></div></div>
         <div class="section-body">
           <div class="field checkbox-field"><label><input type="checkbox" id="lstViewTree" checked> View Results Tree</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstViewTable"> View Results in Table</label></div>
           <div class="field checkbox-field"><label><input type="checkbox" id="lstSummary" checked> Summary Report</label></div>
           <div class="field checkbox-field"><label><input type="checkbox" id="lstAggregate"> Aggregate Report</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstAggregateGraph"> Aggregate Graph</label></div>
           <div class="field checkbox-field"><label><input type="checkbox" id="lstGraph"> Graph Results</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstSimpleWriter"> Simple Data Writer</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstGenSummary"> Generate Summary Results</label></div>
+          <div class="hint" style="margin-top:10px;margin-bottom:4px;">التاليين محتاجين Plugin اسمه "jpgc - Standard Set" مُثبّت من الـ Plugins Manager بتاع JMeter — لو مش مُثبّت هيطلع Error زي "ClassNotFoundException":</div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstRespTimeGraph"> Response Time Graph</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstRespTimePercentiles"> Response Time Percentiles</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstActiveThreads"> Active Threads Over Time</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstTps"> Transactions per Second</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstHps"> Hits per Second</label></div>
+          <div class="field checkbox-field"><label><input type="checkbox" id="lstBytesThroughput"> Bytes Throughput Over Time</label></div>
           <div class="hint">اختار واحد أو أكتر — هيتضافوا في الملف كـ Listeners على مستوى الـ Test Plan.</div>
         </div>
       </div>
 
     </div>
 
-    <div class="preview-col">
-      <div class="preview">
-        <div class="preview-head"><span id="previewFileLabel">login_and_view_meetings.jmx</span><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
-        <pre id="preview-code"></pre>
-      </div>
+    <div class="actions-col">
       <div class="filename-field">
         <div class="field"><label>اسم الملف عند التحميل</label><input id="fileName" value=""></div>
       </div>
       <div class="actions"><button class="primary" id="downloadBtn">تحميل ملف JMX ↓</button></div>
       <div class="validation" id="validationMsg"></div>
+      <pre id="preview-code" style="display:none;"></pre>
     </div>
   </div>
 </div>
@@ -447,9 +454,19 @@ argBlock +
 
 var LISTENER_DEFS = {
   viewTree: {guiclass:'ViewResultsFullVisualizer', testname:'View Results Tree'},
+  viewTable: {guiclass:'TableVisualizer', testname:'View Results in Table'},
   summary: {guiclass:'SummaryReport', testname:'Summary Report'},
   aggregate: {guiclass:'StatVisualizer', testname:'Aggregate Report'},
-  graph: {guiclass:'GraphVisualizer', testname:'Graph Results'}
+  aggregateGraph: {guiclass:'StatGraphVisualizer', testname:'Aggregate Graph'},
+  graph: {guiclass:'GraphVisualizer', testname:'Graph Results'},
+  simpleWriter: {guiclass:'SimpleDataWriter', testname:'Simple Data Writer'},
+  genSummary: {guiclass:'SummariserGui', testname:'Generate Summary Results'},
+  respTimeGraph: {guiclass:'RespTimeGraphVisualizer', testname:'Response Time Graph'},
+  respTimePercentiles: {guiclass:'kg.apc.jmeter.vizualizers.ResponseTimesPercentilesGui', testname:'jp@gc - Response Times Percentiles'},
+  activeThreads: {guiclass:'kg.apc.jmeter.vizualizers.ThreadsStateOverTimeGui', testname:'jp@gc - Active Threads Over Time'},
+  tps: {guiclass:'kg.apc.jmeter.vizualizers.TransactionsPerSecondGui', testname:'jp@gc - Transactions per Second'},
+  hps: {guiclass:'kg.apc.jmeter.vizualizers.HitsPerSecondGui', testname:'jp@gc - Hits per Second'},
+  bytesThroughput: {guiclass:'kg.apc.jmeter.vizualizers.BytesThroughputOverTimeGui', testname:'jp@gc - Bytes Throughput Over Time'}
 };
 
 function buildListenerBlocks(selected){
@@ -627,9 +644,19 @@ function collectValues(){
 function collectListeners(){
   var out = [];
   if(document.getElementById('lstViewTree').checked) out.push('viewTree');
+  if(document.getElementById('lstViewTable').checked) out.push('viewTable');
   if(document.getElementById('lstSummary').checked) out.push('summary');
   if(document.getElementById('lstAggregate').checked) out.push('aggregate');
+  if(document.getElementById('lstAggregateGraph').checked) out.push('aggregateGraph');
   if(document.getElementById('lstGraph').checked) out.push('graph');
+  if(document.getElementById('lstSimpleWriter').checked) out.push('simpleWriter');
+  if(document.getElementById('lstGenSummary').checked) out.push('genSummary');
+  if(document.getElementById('lstRespTimeGraph').checked) out.push('respTimeGraph');
+  if(document.getElementById('lstRespTimePercentiles').checked) out.push('respTimePercentiles');
+  if(document.getElementById('lstActiveThreads').checked) out.push('activeThreads');
+  if(document.getElementById('lstTps').checked) out.push('tps');
+  if(document.getElementById('lstHps').checked) out.push('hps');
+  if(document.getElementById('lstBytesThroughput').checked) out.push('bytesThroughput');
   return out;
 }
 
@@ -648,17 +675,6 @@ function validate(v){
 function refresh(){
   var v = collectValues();
   var errs = validate(v);
-  var msg = document.getElementById('validationMsg');
-  var badge = document.getElementById('statusBadge');
-  if(errs.length){
-    msg.textContent = errs.join(' · ');
-    badge.textContent = 'INCOMPLETE';
-    badge.style.color = 'var(--red)'; badge.style.borderColor = '#7a2b2b'; badge.style.background = 'rgba(255,80,80,0.08)';
-  } else {
-    msg.textContent = '';
-    badge.textContent = 'READY';
-    badge.style.color = 'var(--teal)'; badge.style.borderColor = 'var(--teal-dim)'; badge.style.background = 'rgba(61,220,151,0.08)';
-  }
   var xml = buildJMX(v);
   document.getElementById('preview-code').textContent = xml;
   return {v:v, errs:errs, xml:xml};
@@ -673,9 +689,23 @@ document.querySelectorAll('.checkbox-field input[type="checkbox"]').forEach(func
 
 document.getElementById('downloadBtn').addEventListener('click', function(){
   var r = refresh();
-  if(r.errs.length){ alert('فيه حقول ناقصة:\n' + r.errs.join('\n')); return; }
+  var msg = document.getElementById('validationMsg');
+  var badge = document.getElementById('statusBadge');
   var fname = document.getElementById('fileName').value.trim();
-  if(!fname){ alert('يرجى إدخال اسم الملف'); return; }
+  var errs = r.errs.slice();
+  if(!fname) errs.push('يرجى إدخال اسم الملف');
+
+  if(errs.length){
+    msg.textContent = errs.join(' · ');
+    badge.textContent = 'INCOMPLETE';
+    badge.style.color = 'var(--red)'; badge.style.borderColor = '#7a2b2b'; badge.style.background = 'rgba(255,80,80,0.08)';
+    return;
+  }
+
+  msg.textContent = '';
+  badge.textContent = 'READY';
+  badge.style.color = 'var(--teal)'; badge.style.borderColor = 'var(--teal-dim)'; badge.style.background = 'rgba(61,220,151,0.08)';
+
   var blob = new Blob([r.xml], {type:'application/xml'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
