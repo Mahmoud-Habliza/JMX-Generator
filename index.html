@@ -25,7 +25,7 @@
   .wrap{max-width:1220px;margin:0 auto;}
   .head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:28px;}
   .head h1{font-size:22px;font-weight:600;margin:0 0 6px 0;}
-  .head p{margin:0;color:var(--text-dim);font-size:13px;direction:ltr;text-align:right;unicode-bidi:plaintext;}
+  .head p{margin:0;color:var(--text-dim);font-size:13px;direction:ltr;text-align:right;}
   .status{font-family:var(--mono);font-size:11px;color:var(--teal);border:1px solid var(--teal-dim);background:rgba(61,220,151,0.08);padding:4px 10px;border-radius:2px;white-space:nowrap;}
   .grid{display:block;}
   .section{background:var(--panel);border:1px solid var(--line);border-radius:4px;margin-bottom:18px;overflow:hidden;}
@@ -82,8 +82,8 @@
 
   <div class="head">
     <div>
-      <h1>مولّد Test Plan لـ <span style="direction:ltr;display:inline-block">JMeter</span></h1>
-      <p>Setup Login (once) + Main Thread Group (N users) — Sure QA</p>
+      <h1>Test Plan Generator</h1>
+      <p>From scenario idea to a ready <span style="direction:ltr;display:inline-block">JMX</span> file in minutes — performance testing made easy - <span style="color:var(--amber);font-weight:600;">Habliza</span></p>
     </div>
     <div class="status" id="statusBadge">READY</div>
   </div>
@@ -132,7 +132,6 @@
             <div class="hint" id="loginDisabledHint" style="display:none;">الـ Login متعطّل هنا — لو رفعت ملف JMX فيه Login وعايزه يتكرر لكل مستخدم، ضيفه بنفسك في سكشن السيناريو (4) بدل ما يتضاف هنا.</div>
           </div>
           <div id="setupExtraList"></div>
-          <button class="add-btn" id="addSetupBtn" type="button">+ إضافة طلب Setup إضافي</button>
         </div>
       </div>
 
@@ -332,10 +331,6 @@ function renderScenario(){
 function removeSetup(i){ setupExtra.splice(i,1); renderSetupExtra(); refresh(); }
 function removeScenario(i){ scenario.splice(i,1); renderScenario(); refresh(); }
 
-document.getElementById('addSetupBtn').addEventListener('click', function(){
-  setupExtra.push({name:'Setup Request', method:'GET', path:'', body:''});
-  renderSetupExtra(); refresh();
-});
 document.getElementById('addScenarioBtn').addEventListener('click', function(){
   scenario.push({name:'New Request', domain:'frontend', method:'GET', path:'', paramKey:'', paramVal:'', body:'', thinkTime:0});
   renderScenario(); refresh();
