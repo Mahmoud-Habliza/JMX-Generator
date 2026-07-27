@@ -755,11 +755,13 @@ document.getElementById('downloadBtn').addEventListener('click', function(){
   badge.textContent = 'READY';
   badge.style.color = 'var(--teal)'; badge.style.borderColor = 'var(--teal-dim)'; badge.style.background = 'rgba(61,220,151,0.08)';
 
+  var finalName = fname.replace(/\.[a-zA-Z0-9]+$/, '') + '.jmx';
+
   var blob = new Blob([r.xml], {type:'application/xml'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
-  a.download = fname;
+  a.download = finalName;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 });
